@@ -5,20 +5,31 @@ module.exports = function(sequelize, DataTypes) {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
+      comment: "序號"
     },
     title: {
       type: DataTypes.CHAR(50),
       allowNull: false,
-      defaultValue: "0"
+      defaultValue: "",
+      comment: "標題"
     },
     link: {
       type: DataTypes.TEXT,
-      allowNull: false
+      allowNull: false,
+      comment: "連結"
+    },
+    type: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: "",
+      comment: "總類"
     },
     update: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP'),
+      comment: "更新時間"
     }
   }, {
     sequelize,
@@ -31,13 +42,6 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "id" },
-        ]
-      },
-      {
-        name: "update",
-        using: "BTREE",
-        fields: [
-          { name: "update" },
         ]
       },
     ]

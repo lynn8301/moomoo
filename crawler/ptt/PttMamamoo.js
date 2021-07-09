@@ -1,5 +1,8 @@
 const cheerio = require('cheerio')
+const Sequelize = require('sequelize')
 const base = require('../../lib/base')
+const sequelize = require('../../models/database')
+const Ptt = require('../../models/ptt')(sequelize, Sequelize)
 
 
 class PttMamamoo {
@@ -30,7 +33,8 @@ class PttMamamoo {
 
                 infos.push(info)
             }
-            console.log(infos)
+
+            return infos
         } catch (e) {
             throw new Error(e)
         }
@@ -44,8 +48,8 @@ class PttMamamoo {
             let uri = this.uri
             while(true) {
                 let html = await base.rpRetry(uri)
-                console.log(uri)
-                // let info = this.__html2Json(html)
+                let infos = this.__html2Json(html)
+                await Ptt.bulkCreate(infos)
                 // 下一頁資訊
                 let $ = cheerio.load(html)
                 let nextPage = $('#action-bar-container > div > div.btn-group.btn-group-paging > a').eq(1).attr('href')

@@ -3,6 +3,7 @@ const Sequelize = require('sequelize')
 const moment = require('moment')
 const base = require('../../lib/base')
 const sequelize = require('../../models/database')
+const ptt = require('../../models/ptt')
 const Ptt = require('../../models/ptt')(sequelize, Sequelize)
 
 
@@ -54,17 +55,28 @@ class PttMamamoo {
     async __getMamaooVideos() {
         try {
             let uri = this.uri
-            while(true) {
+            let next = true
+            while(next) {
                 let html = await base.rpRetry(uri)
                 let infos = await this.__html2Json(html)
                 
-                // 儲存到資料庫
-                await Ptt.bulkCreate(infos)
+                for(let info of infos) {
+                    let existed = await Ptt.findAll({
+                        where: {
+                            uni_id: info.uni_id
+                        }
+                    })
+                    if(existed == 0) {
+                        await Ptt.create(info)
+                    } else {
+                        next = false
+                    }
+                }
                 
                 // 下一頁資訊
                 let $ = cheerio.load(html)
                 let nextPage = $('#action-bar-container > div > div.btn-group.btn-group-paging > a').eq(1).attr('href')
-                if(nextPage == undefined) break
+                if(nextPage == undefined) next = false
                 uri = `https://www.ptt.cc${nextPage}` 
             }
         } catch (e) {

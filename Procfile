@@ -1,1 +1,1 @@
-web: node web/app.js
+release: node models/index.js

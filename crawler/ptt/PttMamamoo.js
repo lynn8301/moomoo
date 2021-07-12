@@ -1,5 +1,6 @@
 const cheerio = require('cheerio')
 const Sequelize = require('sequelize')
+const moment = require('moment')
 const base = require('../../lib/base')
 const sequelize = require('../../models/database')
 const Ptt = require('../../models/ptt')(sequelize, Sequelize)
@@ -15,7 +16,7 @@ class PttMamamoo {
      * html2Json
      * @param {*} html
      */
-    __html2Json(html) {
+    async __html2Json(html) {
         try {
             let $ = cheerio.load(html)
             let rows = $('#main-container > div.r-list-container.action-bar-margin.bbs-screen > div.r-ent')
@@ -26,7 +27,14 @@ class PttMamamoo {
                 info.title = ($(rows).eq(i).find('div.title') || "").text().trim()
                 let linkPattern = $(rows).eq(i).find('div.title a').attr('href')
                 info.link = `https://www.ptt.cc${linkPattern}`
-                
+                info.uni_id =  info.link.split('/').pop().replace(/.html/g,'')
+
+                let html2 = await base.rpRetry(info.link)
+                let $2 = cheerio.load(html2)
+                let date = ($2('#main-content div').eq(3).find('span.article-meta-value').text() || "")
+                date = moment(date, 'ddd MMM D kk:mm:ss YYYY').format('YYYY-MM-DD kk:mm:ss')
+                info.date = date
+                                
                 if (/\[影音\]/.test(info.title)) info.type = "video"
                 if (/\[LIVE\]/.test(info.title)) info.type = "live"
                 if (!/\[影音\]|\[LIVE\]/.test(info.title)) continue
@@ -48,8 +56,11 @@ class PttMamamoo {
             let uri = this.uri
             while(true) {
                 let html = await base.rpRetry(uri)
-                let infos = this.__html2Json(html)
+                let infos = await this.__html2Json(html)
+                
+                // 儲存到資料庫
                 await Ptt.bulkCreate(infos)
+                
                 // 下一頁資訊
                 let $ = cheerio.load(html)
                 let nextPage = $('#action-bar-container > div > div.btn-group.btn-group-paging > a').eq(1).attr('href')

@@ -8,8 +8,13 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true,
       comment: "序號"
     },
+    uni_id: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      defaultValue: ""
+    },
     title: {
-      type: DataTypes.CHAR(50),
+      type: DataTypes.CHAR(150),
       allowNull: false,
       defaultValue: "",
       comment: "標題"
@@ -24,6 +29,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: "",
       comment: "總類"
+    },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "發布時間"
     },
     update: {
       type: DataTypes.DATE,
@@ -42,6 +52,13 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "id" },
+        ]
+      },
+      {
+        name: "update",
+        using: "BTREE",
+        fields: [
+          { name: "update" },
         ]
       },
     ]

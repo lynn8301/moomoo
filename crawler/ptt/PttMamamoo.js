@@ -3,7 +3,6 @@ const Sequelize = require('sequelize')
 const moment = require('moment')
 const base = require('../../lib/base')
 const sequelize = require('../../models/database')
-const ptt = require('../../models/ptt')
 const Ptt = require('../../models/ptt')(sequelize, Sequelize)
 
 
